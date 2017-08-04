@@ -141,5 +141,6 @@ VOLUME /var/lib/postgresql/data
 ```
 
 Mirror the data directory
+
 `docker container run --name node-db -p 9000:5432 --rm -v ~/Desktop/myDir/postgres/data:/var/lib/postgresql/data `
 
