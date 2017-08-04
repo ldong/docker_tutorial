@@ -41,7 +41,7 @@ docker rm web-server
 
 docker container run -p 9999:80 --name web-server --rm nginx:latest
 
-docker container run -p 9999:80 --name web-server --rm -v ~/Desktop/Docker/VolumnName/nginx/html:/usr/share/nginx/html nginx nginx:latest
+docker container run -p 9999:80 --name web-server --rm -v ~/Desktop/Docker/VOLUMEName/nginx/html:/usr/share/nginx/html nginx nginx:latest
 ```
 
 
@@ -53,7 +53,7 @@ FROM nginx:latest
 EXPOSE 80
 RUN apt-get update && apt-get install -y nano
 LABEL maintainer="abc@example.com"
-VOLUMN /usr/local/nginx/html
+VOLUME /usr/local/nginx/html
 ```
 
 `docker build -t web-server .`
@@ -72,7 +72,7 @@ WORKDIR /usr/src/app
 COPY package.json /usr/src/app
 RUN npm install
 CMD ["npm", "start"]
-VOLUMN /usr/src/app/src/
+VOLUME /usr/src/app/src/
 ```
 
 `docker container run --name node-app -rm -p 8888:8888 -v ~/Desktop/abc/src:/usr/src/app/src node-app`
@@ -100,11 +100,46 @@ create table votes (id integer primary key, number_of_votes integer, option_name
 
 insert into votes (id, number_of_votes, option_name) values (1, 0, 'sandwitches');
 
-insert into votes (id, number_of_votes, option_name) values (1, 0, 'tacos');
+insert into votes (id, number_of_votes, option_name) values (2, 0, 'tacos');
 
 select * from votes;
 
 ```
 
 Show docker networks: `docker network inspect bridge`
+
+Update
+
+```
+docker container exec -it node-db psql -U postgres
+update votes set number_of_votes=7 where id=2;
+select * from votes
+```
+
+Dockerfile for DB
+
+
+seed.sql
+```sql
+
+CREATE TABLE votes (
+  id integer primary key,
+  number_of_votes integer,
+  option_name varchar(20)
+);
+
+insert into votes (id, number_of_votes, option_name) values (1, 0, 'sandwitches');
+insert into votes (id, number_of_votes, option_name) values (2, 0, 'tacos');
+```
+
+```
+FROM node:4.8
+LABEL maintainer="a@b.com"
+EXPOSE 5432
+COPY seed.sql /docker-entrypoint-initdb.d/
+VOLUME /var/lib/postgresql/data
+```
+
+Mirror the data directory
+`docker container run --name node-db -p 9000:5432 --rm -v ~/Desktop/myDir/postgres/data:/var/lib/postgresql/data `
 
